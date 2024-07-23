@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { LoginUserDto } from './dtos/login-user.dto';
 import { SetupUserProfileDto } from './dtos/setup-user-profile.dto';
+import { CreateUserPostDto } from './dtos/create-user-post.dto';
 
 @ApiTags(SwaggerTags.USERS)
 @Controller('users')
@@ -55,5 +56,16 @@ export class UsersController {
     @Post(':id/profile')
     async setupUserProfile(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) setupUserProfileDto: SetupUserProfileDto) {
         return await this.usersService.setupUserProfile(id, setupUserProfileDto);
+    }
+
+
+    @Post(':id/post')
+    async createPost(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) createUserPostDto: CreateUserPostDto) {
+        return await this.usersService.createPost(id, createUserPostDto);
+    }
+
+    @Get(':id/posts')
+    async getUserPosts(@Param('id', ParseIntPipe) id: number) {
+        return await this.usersService.getUserPosts(id);
     }
 }

@@ -1,3 +1,4 @@
+import { CreateUserPostDto } from './dtos/create-user-post.dto';
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -7,16 +8,23 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { LoginUserDto } from './dtos/login-user.dto';
 import { Profile } from './entities/profile.entity';
 import { SetupUserProfileDto } from './dtos/setup-user-profile.dto';
+import { Post } from './entities/post.entity';
 
 @Injectable()
 export class UsersService {
 
     constructor(@InjectRepository(User) private userRepository: Repository<User>,
-        @InjectRepository(Profile) private profileRepository: Repository<Profile>) { }
+        @InjectRepository(Profile) private profileRepository: Repository<Profile>,
+        @InjectRepository(Post) private postRepository: Repository<Post>) { }
 
 
     async getUsers(): Promise<User[]> {
-        const users: User[] = await this.userRepository.find();
+        const users: User[] = await this.userRepository.find({
+            relations: {
+                profile: true,
+                posts: true,
+            }
+        });
 
         if (users.length === 0) throw new NotFoundException("No users found");
 
@@ -115,6 +123,32 @@ export class UsersService {
         await this.userRepository.save(user);
 
         // await this.userRepository.update({ id }, { profile: savedProfile });
+
+        return user;
+    }
+
+    async createPost(id: number, createUserPostDto: CreateUserPostDto): Promise<Post> {
+
+        const user = await this.userRepository.findOne({ where: { id } });
+
+        if (!user) throw new NotFoundException("User not found");
+
+        const post = this.postRepository.create(createUserPostDto);
+
+        post.user = user;
+
+        await this.postRepository.save(post);
+
+        return post;
+
+    }
+
+
+    async getUserPosts(id: number): Promise<User> {
+
+        const user = await this.userRepository.findOne({ where: { id }, relations: { posts: true } });
+
+        if (!user) throw new NotFoundException("User not found");
 
         return user;
     }
