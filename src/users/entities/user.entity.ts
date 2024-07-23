@@ -1,35 +1,33 @@
-import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from "typeorm";
+import { Profile } from "./profile.entity";
 
 @Entity()
 export class User {
 
-    @PrimaryGeneratedColumn()
-    id: bigint;
+    @PrimaryGeneratedColumn({ type: 'bigint' })
+    id: number;
 
     @Column({ unique: true })
-    @IsNotEmpty()
     username: string;
 
     @Column()
-    @IsNotEmpty()
-    @MinLength(8)
     password: string;
 
     @Column()
-    @IsEmail()
-    @IsNotEmpty()
     email: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'datetime' })
     created_at: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ type: 'datetime' })
     updated_at: Date;
 
     @Column({ nullable: true, default: "auth" })
     auth_strategy: string;
 
 
+    @OneToOne(() => Profile)
+    @JoinColumn({ name: 'profile_id' })
+    profile: Profile;
 
 }
